@@ -19,6 +19,7 @@ env/
 venv/
 env.bak/
 venv.bak/
+tests/
 .python-version
 __pypackages__/
 node_modules/
