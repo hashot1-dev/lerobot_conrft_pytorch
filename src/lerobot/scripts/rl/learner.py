@@ -1408,7 +1408,8 @@ def run_conrft_offline_training(
     offline_iterator = offline_replay_buffer.get_iterator(
         batch_size=batch_size, async_prefetch=cfg.policy.async_prefetch, queue_size=2
     )
-
+    logging.info(f"start_time")
+    start_time      = time.time()   
     # Training loop
     for step in range(optimization_step, offline_steps):
         # Exit if shutdown requested
@@ -1615,7 +1616,10 @@ def run_conrft_offline_training(
                 dataset_repo_id=cfg.dataset.repo_id if cfg.dataset else None,
                 fps=cfg.env.fps,
             )
-
+    
+    end_time = time.time()
+    duration = (end_time - start_time) 
+    logging.info(f"duration: {str(duration)}")    
     logging.info(colored("ConRFT offline training completed!", "green", attrs=["bold"]))
     logging.info(f"Final step: {step}")
 
