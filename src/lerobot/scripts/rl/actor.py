@@ -108,7 +108,9 @@ def actor_cli(cfg: TrainRLServerPipelineConfig):
 
         mp.set_start_method("spawn")
         display_pid = True
+    import os
 
+   
     # Create logs directory to ensure it exists
     log_dir = os.path.join(cfg.output_dir, "logs")
     os.makedirs(log_dir, exist_ok=True)
@@ -117,7 +119,9 @@ def actor_cli(cfg: TrainRLServerPipelineConfig):
     # Initialize logging with explicit log file
     init_logging(log_file=log_file, display_pid=display_pid)
     logging.info(f"Actor logging initialized, writing to {log_file}")
-
+    os.environ['HF_ENDPOINT']= 'https://hf-mirror.com'
+    os.environ['HF_TOKEN']= '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'
+    logging.info("https://hf-mirror.com ")
     is_threaded = use_threads(cfg)
     shutdown_event = ProcessSignalHandler(is_threaded, display_pid=display_pid).shutdown_event
 
@@ -237,15 +241,16 @@ def act_with_policy(
         logging.info("Actor policy process logging initialized")
 
     logging.info("make_env online")
-
+    logging.info("mengke 1")
     online_env = make_robot_env(cfg=cfg.env)
-
+    logging.info("mengke 2")
     set_seed(cfg.seed)
+    logging.info("mengke 3")
     device = get_safe_torch_device(cfg.policy.device, log=True)
-
+    logging.info("mengke 4")
     torch.backends.cudnn.benchmark = True
     torch.backends.cuda.matmul.allow_tf32 = True
-
+    logging.info("mengke 5")
     logging.info("make_policy")
 
     ### Instantiate the policy in both the actor and learner processes

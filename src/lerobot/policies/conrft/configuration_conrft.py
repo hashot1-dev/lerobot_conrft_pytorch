@@ -178,7 +178,8 @@ class ConRFTConfig(PreTrainedConfig):
 
     # Pretrained policy checkpoint path (for loading from offline training)
     pretrained_model_path: str | None = None
-
+    #mengke
+    #pretrained_path: str | None = None  
     # Proprioception settings
     use_proprio: bool = True
     proprio_latent_dim: int = 64

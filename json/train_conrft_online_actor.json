@@ -133,7 +133,7 @@
         "device": "cpu",
         "use_amp": false,
         "storage_device": "cpu",
-        "pretrained_path": "outputs/train_conrft_offline/checkpoints/last/pretrained_model",
+        "pretrained_model_path": "/workspace/outputs/train_conrft_offline/checkpoints/last/pretrained_model",
         "freeze_base_vla": true,
         "use_proprio": true,
         "proprio_latent_dim": 64,
@@ -169,7 +169,7 @@
     },
     "env": {
         "type": "hil",
-        "task": "PandaPickCubeDualViewGamepad-v0",
+        "task": "PandaPickCubeKeyboard",
         "fps": 30,
         "state_dim": 18,
         "action_dim": 4,

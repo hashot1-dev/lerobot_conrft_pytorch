@@ -307,6 +307,7 @@ class ImageTokenizer(nn.Module):
         # Stack all spatial observation inputs
         enc_inputs = extract_inputs(obs_stack_keys, observations, check_spatial=True)
 
+
         # Stack task inputs if specified
         if self.task_stack_keys and tasks is not None:
             needed_task_keys = regex_filter(self.task_stack_keys, observations.keys())
@@ -334,12 +335,16 @@ class ImageTokenizer(nn.Module):
 
         # Reshape for encoder
         enc_inputs = enc_inputs.reshape(b * t, h, w, c)
+        print("enc_inputs.shape")
+        print(enc_inputs.shape)
 
         # Extract non-spatial FiLM inputs
         encoder_input_kwargs = {}
 
         # Run visual encoder
         image_tokens = self.encoder(enc_inputs, **encoder_input_kwargs)
+        print("image_tokens.shape")
+        print(image_tokens.shape)
 
         # Reshape back to batch, timestep format
         if isinstance(image_tokens, torch.Tensor):

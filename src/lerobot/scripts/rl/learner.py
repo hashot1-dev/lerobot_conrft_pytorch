@@ -110,11 +110,16 @@ LOG_PREFIX = "[LEARNER]"
 
 @parser.wrap()
 def train_cli(cfg: TrainRLServerPipelineConfig):
+
+    logging.info("[LEARNER] aaaa")
     if not use_threads(cfg):
+        logging.info("[LEARNER] bbbb")
         import torch.multiprocessing as mp
 
         mp.set_start_method("spawn")
-
+    import os
+    os.environ['HF_ENDPOINT']= 'https://hf-mirror.com'
+    os.environ['HF_TOKEN']= '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'
     # Use the job_name from the config
     train(
         cfg,

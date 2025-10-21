@@ -504,7 +504,9 @@ class OctoWithoutHead(nn.Module):
         self.obs_primary_pos_embedding = nn.Parameter(
             torch.randn(1, self.max_horizon, 256, self.token_embedding_size) * 0.02
         )
-
+        # self.obs_primary_pos_embedding = nn.Parameter(
+        #     torch.randn(1, self.max_horizon, 256, self.token_embedding_size) * 0.02
+        # )mengke
         # Wrist observation tokens: 64 tokens with d_model dimensions
         self.obs_wrist_pos_embedding = nn.Parameter(
             torch.randn(1, self.max_horizon, 64, self.token_embedding_size) * 0.02
@@ -663,13 +665,17 @@ class OctoWithoutHead(nn.Module):
                 if name == "image_primary":
                     projected_tokens = self.obs_primary_projection(token_group.tokens)
                     pos_embedding = self.obs_primary_pos_embedding
+                    print("image_primary "+str(len(pos_embedding)))
                 elif name == "image_wrist":
                     projected_tokens = self.obs_wrist_projection(token_group.tokens)
                     pos_embedding = self.obs_wrist_pos_embedding
+                    print("image_wrist "+str(len(pos_embedding)))
                 else:
                     projected_tokens = token_group.tokens
                     pos_embedding = None
-
+                    print("else ")
+                print(projected_tokens.shape)
+                print(pos_embedding.shape)
                 # Add positional embedding
                 if pos_embedding is not None:
                     processed_tokens = projected_tokens + pos_embedding[:, : projected_tokens.shape[1]]

@@ -2,8 +2,8 @@ wandb的 key
 7f00f9e062418963f09b09b5a137879fb8a8380b
 
 1）docker启动命令：
-cd  /home/sr/project/lerobot-lilkm-port-conrft/src
-docker run   --runtime=nvidia   -it --rm      -v "$PWD":/workspace     -w /workspace     mk:test2
+cd  /home/sr/project/lerobot-lilkm-port-conrft
+docker run   --runtime=nvidia   -v /tmp/.X11-unix:/tmp/.X11-unix  -it --rm      -v "$PWD":/workspace     -w /workspace     mk:test2
 
 2)  Cal-ConRFT (offline)  执行 
 

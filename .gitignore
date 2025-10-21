@@ -16,7 +16,9 @@
 .env
 .venv
 env/
+outputs_/
 venv/
+MUJOCO_LOG.TXT
 env.bak/
 venv.bak/
 .python-version
@@ -173,4 +175,4 @@ outputs/
 
 # Dev folders
 .cache/*
-*safetensors
+*.safetensors

@@ -142,7 +142,7 @@
         "proprio_latent_dim": 64,
         "state_dim": 18,
         
-        "offline_steps": 5000,
+        "offline_steps": 1000,
         "online_steps": 0,
         
         "time_dim": 16,
