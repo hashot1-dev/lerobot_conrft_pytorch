@@ -12,7 +12,7 @@
 # distributed under the License is distributed on an "AS IS" BASIS,
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
-# limitations under the License.
+# limitations under the License. debug
 
 """
 Simple script to control a robot from teleoperation.
@@ -42,6 +42,7 @@ from lerobot.robots import (  # noqa: F401
     koch_follower,
     make_robot_from_config,
     so100_follower,
+    so101_follower,
 )
 from lerobot.teleoperators import (  # noqa: F401
     TeleoperatorConfig,
@@ -49,6 +50,7 @@ from lerobot.teleoperators import (  # noqa: F401
     koch_leader,
     make_teleoperator_from_config,
     so100_leader,
+    so101_leader
 )
 from lerobot.utils.robot_utils import busy_wait
 
@@ -58,7 +60,7 @@ class FindJointLimitsConfig:
     teleop: TeleoperatorConfig
     robot: RobotConfig
     # Limit the maximum frames per second. By default, no limit.
-    teleop_time_s: float = 30
+    teleop_time_s: float = 60
     # Display all cameras on screen
     display_data: bool = False
 
