@@ -57,6 +57,7 @@ from lerobot.robots import (  # noqa: F401
     RobotConfig,
     make_robot_from_config,
     so100_follower,
+    so101_follower,
 )
 from lerobot.teleoperators import (
     gamepad,  # noqa: F401
@@ -2205,6 +2206,7 @@ def main(cfg: EnvConfig):
     env = make_robot_env(cfg)
 
     if cfg.mode == "record":
+        print("!!!record!!!")
         policy = None
         if cfg.pretrained_policy_name_or_path is not None:
             from lerobot.policies.sac.modeling_sac import SACPolicy

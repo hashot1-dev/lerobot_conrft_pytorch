@@ -1175,7 +1175,8 @@ class MotorsBus(abc.ABC):
         models = [self._id_to_model(id_) for id_ in ids_values]
         if self._has_different_ctrl_tables:
             assert_same_address(self.model_ctrl_table, models, data_name)
-
+        print("models")
+        print(models)
         model = next(iter(models))
         addr, length = get_address(self.model_ctrl_table, model, data_name)
 
