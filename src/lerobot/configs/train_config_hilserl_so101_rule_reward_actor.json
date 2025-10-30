@@ -247,7 +247,7 @@
             "max_gripper_pos": 30
         },
         "name": "real_robot",
-        "fps": 5,
+        "fps": 10,
 
         "task": "",
         "features": {

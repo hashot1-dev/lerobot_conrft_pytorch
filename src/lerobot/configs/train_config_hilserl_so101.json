@@ -1,12 +1,12 @@
 {
-    "output_dir": null,
+    "output_dir": "output/actor/test8a",
     "job_name": "default",
     "resume": false,
     "seed": 1000,
     "num_workers": 4,
     "batch_size": 256,
     "steps": 100000,
-    "log_freq": 1,
+    "log_freq": 10,
     "save_checkpoint": true,
     "save_freq": 1000,
     "wandb": {
@@ -15,8 +15,8 @@
         "disable_artifact": true
     },
     "dataset": {
-        "repo_id": "test6",
-        "root": "/workspace/dataset/test6"
+        "repo_id": "mengke/test8",
+        "root": null
     },
     "policy": {
         "type": "sac",
@@ -125,7 +125,7 @@
         "online_buffer_capacity": 30000,
         "offline_buffer_capacity": 10000,
         "online_step_before_learning": 10,
-        "policy_update_freq": 1,
+        "policy_update_freq": 10,
         "discount": 0.97,
         "async_prefetch": false,
         "temperature_init": 0.01,
@@ -182,7 +182,7 @@
             "cameras": {
                 "top": {
                     "type": "opencv",
-                    "index_or_path": 5,
+                    "index_or_path": 4,
                     "height": 480,
                     "width": 640,
                     "fps": 15
@@ -245,7 +245,7 @@
             "max_gripper_pos": 30
         },
         "name": "real_robot",
-        "fps": 1,
+        "fps": 2,
 
         "task": "",
         "features": {

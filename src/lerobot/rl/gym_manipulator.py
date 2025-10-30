@@ -798,6 +798,7 @@ def control_loop(
 
             transition = create_transition(observation=obs, info=info)
             transition = env_processor(transition)
+            input()
 
         # Maintain fps timing
         busy_wait(dt - (time.perf_counter() - step_start_time))

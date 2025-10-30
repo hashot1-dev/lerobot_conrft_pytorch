@@ -1,5 +1,5 @@
 {
-    "output_dir": "output/test2/learner",
+    "output_dir": "output/test8",
     "job_name": "default",
     "resume": false,
     "seed": 1000,
@@ -8,7 +8,7 @@
     "steps": 100000,
     "log_freq": 100,
     "save_checkpoint": true,
-    "save_freq": 500,
+    "save_freq": 1000,
     "wandb": {
         "enable": true,
         "project": "so101_real",
@@ -247,7 +247,7 @@
             "max_gripper_pos": 30
         },
         "name": "real_robot",
-        "fps": 5,
+        "fps": 10,
 
         "task": "",
         "features": {
