@@ -43,6 +43,7 @@ from .gym_action_processor import (
 from .hil_processor import (
     AddTeleopActionAsComplimentaryDataStep,
     AddTeleopEventsAsInfoStep,
+    # DinoDetectionRewardProcessorStep,
     GripperPenaltyProcessorStep,
     ImageCropResizeProcessorStep,
     InterventionActionProcessorStep,
@@ -116,6 +117,7 @@ __all__ = [
     "RobotActionProcessorStep",
     "RobotObservation",
     "RenameObservationsProcessorStep",
+    # "DinoDetectionRewardProcessorStep",
     "RewardClassifierProcessorStep",
     "RewardRuleProcessorStep",
     "RewardProcessorStep",

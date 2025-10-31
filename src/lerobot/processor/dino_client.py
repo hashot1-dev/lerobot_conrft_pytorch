@@ -9,7 +9,7 @@ import time
 import numpy as np
 import cv2
 from typing import Tuple, List
-import supervision as sv
+# import supervision as sv
 
 from enum import Enum, auto
 

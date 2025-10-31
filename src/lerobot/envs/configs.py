@@ -157,6 +157,20 @@ class RewardClassifierConfig:
     success_threshold: float = 0.5
     success_reward: float = 1.0
 
+
+@dataclass
+class DinoDetectionRewardConfig:
+    """Configuration for reward shaping using DINO detections."""
+
+    prompts: list[str] | None = None
+    image_key: str = "observation.images.top"
+    server_uri: str = "ws://localhost:9548"
+    box_threshold: float = 0.4
+    text_threshold: float | None = None
+    reward_scale: float = 1.0
+    distance_norm: float = 1.0
+
+
 @dataclass
 class RewardRuleConfig:
     """Configuration for reward rule."""
@@ -217,6 +231,7 @@ class HILSerlProcessorConfig:
     reset: ResetConfig | None = None
     inverse_kinematics: InverseKinematicsConfig | None = None
     reward_classifier: RewardClassifierConfig | None = None
+    dino_reward: DinoDetectionRewardConfig | None = None
     reward_rule: RewardRuleConfig | None = None
     max_gripper_pos: float | None = 100.0
 

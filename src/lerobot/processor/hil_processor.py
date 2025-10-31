@@ -15,6 +15,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import logging
 import math
 import time
 from dataclasses import dataclass
@@ -29,6 +30,7 @@ from lerobot.teleoperators.teleoperator import Teleoperator
 from lerobot.teleoperators.utils import TeleopEvents
 
 from .core import EnvTransition, PolicyAction, TransitionKey
+# from .dino_client import DinoClientManager, dino_client_detect
 from .pipeline import (
     ComplementaryDataProcessorStep,
     InfoProcessorStep,
@@ -41,6 +43,7 @@ from .pipeline import (
 GRIPPER_KEY = "gripper"
 DISCRETE_PENALTY_KEY = "discrete_penalty"
 TELEOP_ACTION_KEY = "teleop_action"
+LOGGER = logging.getLogger(__name__)
 
 
 @runtime_checkable
@@ -599,6 +602,114 @@ class RewardClassifierProcessorStep(ProcessorStep):
         self, features: dict[PipelineFeatureType, dict[str, PolicyFeature]]
     ) -> dict[PipelineFeatureType, dict[str, PolicyFeature]]:
         return features
+
+
+# @ProcessorStepRegistry.register("dino_detection_reward_processor")
+# @dataclass
+# class DinoDetectionRewardProcessorStep(ProcessorStep):
+#     """
+#     Computes a reward based on the distance between two detected objects using DINO detections.
+
+#     Two prompts are evaluated on the same camera image; if both are found, the Euclidean distance
+#     between their bounding-box centers drives a shaping reward.
+#     """
+
+#     prompts: tuple[str, str]
+#     image_key: str = "observation.images.top"
+#     server_uri: str = "ws://localhost:9548"
+#     box_threshold: float = 0.4
+#     text_threshold: float | None = None
+#     reward_scale: float = 1.0
+#     distance_norm: float = math.sqrt(2.0)
+
+#     def __post_init__(self) -> None:
+#         if len(self.prompts) != 2:
+#             raise ValueError("DinoDetectionRewardProcessorStep requires exactly two detection prompts.")
+#         self._client = DinoClientManager(server_uri=self.server_uri)
+#         self._text_threshold = (
+#             self.text_threshold if self.text_threshold is not None else max(self.box_threshold - 0.05, 0.0)
+#         )
+
+#     def __call__(self, transition: EnvTransition) -> EnvTransition:
+#         new_transition = transition.copy()
+#         observation = new_transition.get(TransitionKey.OBSERVATION)
+#         if observation is None:
+#             return new_transition
+
+#         image_value = observation.get(self.image_key)
+#         if image_value is None:
+#             LOGGER.debug("DINO reward skipped: image key %s missing.", self.image_key)
+#             return new_transition
+
+#         try:
+#             image_np = self._to_numpy_image(image_value)
+#         except (TypeError, ValueError) as exc:
+#             LOGGER.warning("DINO reward skipped due to image conversion error: %s", exc)
+#             return new_transition
+
+#         centers: list[np.ndarray | None] = []
+#         for prompt in self.prompts:
+#             detections = dino_client_detect(
+#                 model=self._client,
+#                 image=image_np,
+#                 prompt=prompt,
+#                 box_threshold=self.box_threshold,
+#                 text_threshold=self._text_threshold,
+#             )
+#             if not detections:
+#                 centers.append(None)
+#                 LOGGER.debug("DINO reward: no detection for prompt '%s'.", prompt)
+#                 continue
+#             det = detections[0]
+#             centers.append(np.array([float(det.box[0]), float(det.box[1])], dtype=float))
+
+#         if None in centers:
+#             return new_transition
+
+#         center_a, center_b = centers  # type: ignore[misc]
+#         distance = float(np.linalg.norm(center_a - center_b))
+#         norm = self.distance_norm if self.distance_norm > 0 else math.sqrt(2.0)
+#         normalized_distance = min(distance / norm, 1.0) if norm > 0 else distance
+#         reward_delta = self.reward_scale * (1.0 - normalized_distance)
+
+#         reward = float(new_transition.get(TransitionKey.REWARD, 0.0))
+#         reward += reward_delta
+#         new_transition[TransitionKey.REWARD] = reward
+
+#         info = dict(new_transition.get(TransitionKey.INFO, {}))
+#         info["dino_distance"] = distance
+#         info["dino_reward_delta"] = reward_delta
+#         new_transition[TransitionKey.INFO] = info
+
+#         return new_transition
+
+#     @staticmethod
+#     def _to_numpy_image(image: Any) -> np.ndarray:
+#         """
+#         Convert observation image to uint8 HWC format expected by the DINO client.
+#         """
+#         if isinstance(image, torch.Tensor):
+#             tensor = image.detach().cpu()
+#             if tensor.ndim == 4:
+#                 tensor = tensor[0]
+#             if tensor.ndim != 3:
+#                 raise ValueError(f"Expected 3D tensor for image, got shape {tuple(tensor.shape)}")
+#             if tensor.shape[0] in (1, 3, 4):
+#                 tensor = tensor.permute(1, 2, 0)
+#             array = tensor.clamp(0.0, 1.0).numpy()
+#             return (array * 255.0).astype(np.uint8)
+
+#         if isinstance(image, np.ndarray):
+#             array = image
+#             if array.ndim == 4:
+#                 array = array[0]
+#             if array.ndim != 3:
+#                 raise ValueError(f"Expected 3D array for image, got shape {tuple(array.shape)}")
+#             if array.dtype != np.uint8:
+#                 array = np.clip(array, 0, 255).astype(np.uint8)
+#             return array
+
+#         raise TypeError(f"Unsupported image type for DINO reward: {type(image)}")
 
 
 @ProcessorStepRegistry.register("reward_rule_processor")
