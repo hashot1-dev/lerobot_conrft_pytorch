@@ -1,5 +1,5 @@
 {
-    "output_dir": "output/test8/learner",
+    "output_dir": null,
     "job_name": "default",
     "resume": false,
     "seed": 1000,
@@ -15,11 +15,12 @@
         "disable_artifact": true
     },
     "dataset": {
-        "repo_id": "mengke/test8",
-        "root": "/workspace/dataset/test7"
+        "repo_id": "mengke/test1101_dino_50",
+        "root": null
     },
     "policy": {
         "type": "sac",
+
         "n_obs_steps": 1,
         "normalization_mapping": {
             "VISUAL": "MEAN_STD",
@@ -29,6 +30,14 @@
         },
         "input_features": {
             "observation.images.top": {
+                "type": "VISUAL",
+                "shape": [
+                    3,
+                    128,
+                    128
+                ]
+            },
+            "observation.images.right": {
                 "type": "VISUAL",
                 "shape": [
                     3,
@@ -177,7 +186,7 @@
         "type": "gym_manipulator",
             "robot": {
             "type": "so101_follower",
-            "port": "/dev/ttyACM2",
+            "port": "/dev/ttyACM1",
             "id": "follower2",
             "cameras": {
                 "top": {
@@ -185,7 +194,13 @@
                     "index_or_path": 4,
                     "height": 480,
                     "width": 640,
-                    "fps": 15
+                    "fps": 30                },
+                "right": {
+                    "type": "opencv",
+                    "index_or_path": 6,
+                    "height": 480,
+                    "width": 640,
+                    "fps": 30
                 }
             }
         },
@@ -201,9 +216,11 @@
             },
             "image_preprocessing": {
                 "crop_params_dict": {
-                  "observation.images.top": [49, 189, 262, 305]
+                  
+                  "observation.images.top": [0, 70, 480, 480],
+                  "observation.images.right": [0, 160, 480, 480]
                 },
-                "resize_size": [128, 128]            
+                "resize_size": [128, 128]           
             },
             "gripper": {
                 "use_gripper": true,
@@ -237,10 +254,14 @@
                     "z": 0.02
                 }
             },
-            "reward_classifier": {
-                "pretrained_path": null,
-                "success_threshold": 0.5,
-                "success_reward": 1.0
+            "dino_reward": {
+                "prompts": ["Pink bowl", "orange color object"],
+                "image_key": "observation.images.top",
+                "server_uri": "ws://192.168.2.187:9548",
+                "box_threshold": 0.2,
+                "text_threshold": 0.2,
+                "reward_scale": 1.0,
+                "distance_norm": 0.35
             },
             "max_gripper_pos": 30
         },
@@ -257,7 +278,14 @@
                     128
                 ]
             },
-            
+            "observation.images.right": {
+                "type": "VISUAL",
+                "shape": [
+                    3,
+                    128,
+                    128
+                ]
+            },
             "observation.state": {
                 "type": "STATE",
                 "shape": [
@@ -271,6 +299,6 @@
                 ]
             }
         },
-        "features_map": {"observation.images.top": "observation.images.top", "observation.images.right": "observation.images.right", "observation.state": "observation.state","action":"action"}
+        "features_map": {"observation.images.top": "observation.images.top", "observation.images.right": "observation.images.right","observation.state": "observation.state","action":"action"}
     }
 }

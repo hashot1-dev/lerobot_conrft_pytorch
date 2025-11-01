@@ -671,11 +671,6 @@ class DinoDetectionRewardProcessorStep(ProcessorStep):
         norm = self.distance_norm if self.distance_norm > 0 else math.sqrt(2.0)
         normalized_distance = min(distance / norm, 1.0) if norm > 0 else distance
         reward_delta = self.reward_scale * (1.0 - normalized_distance)
-
-        reward = float(new_transition.get(TransitionKey.REWARD, 0.0))
-        reward += reward_delta
-        new_transition[TransitionKey.REWARD] = reward
-
         
         info = dict(new_transition.get(TransitionKey.INFO, {}))
         info["dino_distance"] = distance
@@ -699,9 +694,12 @@ class DinoDetectionRewardProcessorStep(ProcessorStep):
             print("DinoDetectionRewardProcessorStep failed, no ee pose")
             return new_transition
         print(time.time())
-        print(f"#####reward {reward}, distance {distance} ee_x: {ee_x}, ee_y: {ee_y}, ee_z: {ee_z}")
-        if reward > 0.75 and ee_z < 0.13:
+        print(f"#####dino score {reward_delta}, distance {distance} ee_x: {ee_x}, ee_y: {ee_y}, ee_z: {ee_z}")
+        if reward_delta > 0.75 and ee_z < 0.13:
             terminated = True
+            # reward = float(new_transition.get(TransitionKey.REWARD, 0.0))
+            # reward += reward_delta
+            new_transition[TransitionKey.REWARD] = 1.0
 
         # Update transition
         new_transition[TransitionKey.DONE] = terminated

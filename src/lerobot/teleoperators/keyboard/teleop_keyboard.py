@@ -34,13 +34,16 @@ try:
         raise ImportError("pynput blocked intentionally due to no display.")
 
     from pynput import keyboard
-except ImportError:
+except ImportError as e:
     keyboard = None
+    logging.warning(f"ImportErrore  : {e}")
+    print("ImportError pynput")
     PYNPUT_AVAILABLE = False
 except Exception as e:
     keyboard = None
     PYNPUT_AVAILABLE = False
-    logging.info(f"Could not import pynput: {e}")
+    print("not import pynput")
+    logging.warning(f"Could not import pynput: {e}")
 
 
 class KeyboardTeleop(Teleoperator):

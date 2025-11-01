@@ -2,19 +2,19 @@
     "env": {
         "robot": {
             "type": "so101_follower",
-            "port": "/dev/ttyACM2",
+            "port": "/dev/ttyACM1",
             "id": "follower2",
             "cameras": {
                 "top": {
                     "type": "opencv",
-                    "index_or_path": 5,
+                    "index_or_path": 4,
                     "height": 480,
                     "width": 640,
                     "fps": 30
                 },
                 "right": {
                     "type": "opencv",
-                    "index_or_path": 7,
+                    "index_or_path": 6,
                     "height": 480,
                     "width": 640,
                     "fps": 30
@@ -34,7 +34,8 @@
             "image_preprocessing": {
                 "crop_params_dict": {
                   
-                  "observation.images.top": [0, 136, 360, 360]
+                  "observation.images.top": [0, 70, 480, 480],
+                  "observation.images.right": [0, 160, 480, 480]
                 },
                 "resize_size": [128, 128]            
             },
@@ -68,14 +69,14 @@
                     "z": 0.02
                 }
             },
-            "detect_reward": {
-                "prompts": ["Pink bowl", "Orange ring"],
+            "dino_reward": {
+                "prompts": ["Pink bowl", "orange color object"],
                 "image_key": "observation.images.top",
                 "server_uri": "ws://192.168.2.187:9548",
                 "box_threshold": 0.2,
                 "text_threshold": 0.2,
                 "reward_scale": 1.0,
-                "distance_norm": 1.0
+                "distance_norm": 0.35
             },
             "max_gripper_pos": 30
         },
@@ -83,10 +84,10 @@
         "fps": 10
     },
     "dataset": {
-        "repo_id": "mengke/test11",
-        "root": "/home/sr/so101/lerobot/dataset/test8",
+        "repo_id": "mengke/test1101_01_dino_50",
+        "root": null,
         "task": "ss",
-        "num_episodes_to_record": 15,
+        "num_episodes_to_record": 50,
         "replay_episode": null,
         "push_to_hub": false
     },

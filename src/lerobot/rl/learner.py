@@ -727,7 +727,8 @@ def save_training_checkpoint(
 
     # Create checkpoint directory
     checkpoint_dir = get_step_checkpoint_dir(cfg.output_dir, online_steps, optimization_step)
-
+    print("checkpoint_dir")
+    print(checkpoint_dir)
     # Save checkpoint
     save_checkpoint(
         checkpoint_dir=checkpoint_dir,
