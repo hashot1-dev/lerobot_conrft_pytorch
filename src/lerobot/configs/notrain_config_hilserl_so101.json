@@ -1,5 +1,5 @@
 {
-    "output_dir": "output/actor/test8a",
+    "output_dir": "output/test8/learner",
     "job_name": "default",
     "resume": false,
     "seed": 1000,
@@ -16,7 +16,7 @@
     },
     "dataset": {
         "repo_id": "mengke/test8",
-        "root": null
+        "root": "/workspace/dataset/test7"
     },
     "policy": {
         "type": "sac",
@@ -257,6 +257,7 @@
                     128
                 ]
             },
+            
             "observation.state": {
                 "type": "STATE",
                 "shape": [
@@ -270,6 +271,6 @@
                 ]
             }
         },
-        "features_map": {"observation.images.top": "observation.images.top", "observation.state": "observation.state","action":"action"}
+        "features_map": {"observation.images.top": "observation.images.top", "observation.images.right": "observation.images.right", "observation.state": "observation.state","action":"action"}
     }
 }

@@ -69,14 +69,10 @@
                     "z": 0.02
                 }
             },
-            "dino_reward": {
-                "prompts": ["Pink bowl", "orange color object"],
-                "image_key": "observation.images.top",
-                "server_uri": "ws://192.168.2.187:9548",
-                "box_threshold": 0.2,
-                "text_threshold": 0.2,
-                "reward_scale": 1.0,
-                "distance_norm": 0.35
+            "reward_classifier": {
+                "pretrained_path": null,
+                "success_threshold": 0.5,
+                "success_reward": 1.0
             },
             "max_gripper_pos": 30
         },
@@ -84,10 +80,10 @@
         "fps": 10
     },
     "dataset": {
-        "repo_id": "mengke/testc30_dino",
+        "repo_id": "mengke/testc30",
         "root": null,
         "task": "ss",
-        "num_episodes_to_record": 1,
+        "num_episodes_to_record": 30,
         "replay_episode": null,
         "push_to_hub": false
     },
