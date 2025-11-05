@@ -164,6 +164,28 @@ class GymManipulatorConfig:
     mode: str | None = None  # Either "record", "replay", None
     device: str = "cpu"
 
+def reset_follower_position1(robot_arm: Robot, target_position: np.ndarray) -> None:
+    """Reset robot arm to target position using smooth trajectory."""
+    current_position_dict = robot_arm.bus.sync_read("Present_Position")
+    print("current_position_dict")
+    print(current_position_dict)
+    current_position_dict["wrist_roll"]=-100.0
+    current_position_dict["gripper"]=90.0
+    robot_arm.bus.sync_write("Goal_Position", current_position_dict)
+
+    # current_position = np.array(
+    #     [current_position_dict[name] for name in current_position_dict], dtype=np.float32
+    # )
+    # trajectory = torch.from_numpy(
+    #     np.linspace(current_position, target_position, 50)
+    # )  # NOTE: 30 is just an arbitrary number
+    # for pose in trajectory:
+    #     action_dict = dict(zip(current_position_dict, pose, strict=False))
+    #     robot_arm.bus.sync_write("Goal_Position", action_dict)
+    #     busy_wait(0.015)
+    current_position_dict = robot_arm.bus.sync_read("Present_Position")
+    print("current_position_dict:", current_position_dict)
+    time.sleep(100)
 
 def reset_follower_position(robot_arm: Robot, target_position: np.ndarray) -> None:
     """Reset robot arm to target position using smooth trajectory."""
@@ -225,6 +247,7 @@ class RobotEnv(gym.Env):
 
         self._joint_names = list(self.robot.bus.motors.keys())
         self._raw_joint_positions = None
+        self.lasttime = time.time()
 
         self._setup_spaces()
 
@@ -315,17 +338,49 @@ class RobotEnv(gym.Env):
         self._raw_joint_positions = {f"{key}.pos": obs[f"{key}.pos"] for key in self._joint_names}
         return obs, {TeleopEvents.IS_INTERVENTION: False}
 
+    def reset1(
+        self, *, seed: int | None = None, options: dict[str, Any] | None = None
+    ) -> tuple[dict[str, Any], dict[str, Any]]:
+        """Reset environment to initial state.
+
+        Args:
+            seed: Random seed for reproducibility.
+            options: Additional reset options.
+
+        Returns:
+            Tuple of (observation, info) dictionaries.
+        """
+        # Reset the robot
+        # self.robot.reset()
+        start_time = time.perf_counter()
+        if self.reset_pose is not None:
+            print("Reset1 the environment.")
+
+            reset_follower_position1(self.robot, np.array(self.reset_pose))
+            print("Reset1 the environment done.")
+
+        busy_wait(self.reset_time_s - (time.perf_counter() - start_time))
+
+        super().reset(seed=seed, options=options)
+
+        # Reset episode tracking variables.
+        self.current_step = 0
+        self.episode_data = None
+        obs = self._get_observation()
+        self._raw_joint_positions = {f"{key}.pos": obs[f"{key}.pos"] for key in self._joint_names}
+        return obs, {TeleopEvents.IS_INTERVENTION: False}
+
     def step(self, action) -> tuple[dict[str, np.ndarray], float, bool, bool, dict[str, Any]]:
         """Execute one environment step with given action."""
         joint_targets_dict = {f"{key}.pos": action[i] for i, key in enumerate(self.robot.bus.motors.keys())}
         
-
-        print("send action: ", joint_targets_dict)
+        self.lasttime = time.time()    
+        print("send action: ",joint_targets_dict)
         if joint_targets_dict["elbow_flex.pos"] < 3.7037:
             joint_targets_dict["elbow_flex.pos"] = 3.7037
-            print(joint_targets_dict["elbow_flex.pos"])
         self.robot.send_action(joint_targets_dict)
-
+        
+        print("$$$send 1action_du:"+str(time.time()-self.lasttime))
         obs = self._get_observation()
 
         self._raw_joint_positions = {f"{key}.pos": obs[f"{key}.pos"] for key in self._joint_names}
@@ -338,7 +393,7 @@ class RobotEnv(gym.Env):
         reward = 0.0
         terminated = False
         truncated = False
-
+        print("$$$send 2action_du:"+str(time.time()-self.lasttime))
         return (
             obs,
             reward,
@@ -633,7 +688,9 @@ def step_env_and_process_transition(
     transition[TransitionKey.OBSERVATION] = (
         env.get_raw_joint_positions() if hasattr(env, "get_raw_joint_positions") else {}
     )
+    lasttime= time.time()
     processed_action_transition = action_processor(transition)
+    print("$$$action_processor_du: "+str(time.time()-lasttime))
     processed_action = processed_action_transition[TransitionKey.ACTION]
 
     obs, reward, terminated, truncated, info = env.step(processed_action)
@@ -654,8 +711,10 @@ def step_env_and_process_transition(
         info=new_info,
         complementary_data=complementary_data,
     )
+    lasttime1= time.time()
     new_transition = env_processor(new_transition)
-
+    print("$$$env_processor_du: "+str(time.time()-lasttime1))
+    print("step_env_and_process_transition: "+str(time.time()-lasttime))
     return new_transition
 
 

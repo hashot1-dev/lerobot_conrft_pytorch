@@ -15,10 +15,11 @@
 # limitations under the License.
 
 import logging
-import time
+import time,torch
 from functools import cached_property
 from typing import Any
-
+from lerobot.utils.robot_utils import busy_wait
+import numpy as np
 from lerobot.cameras.utils import make_cameras_from_configs
 from lerobot.motors import Motor, MotorCalibration, MotorNormMode
 from lerobot.motors.feetech import (
@@ -189,8 +190,7 @@ class SO101Follower(Robot):
             logger.debug(f"{self} read {cam_key}: {dt_ms:.1f}ms")
 
         return obs_dict
-
-    def send_action(self, action: dict[str, Any]) -> dict[str, Any]:
+    def send_action1(self, action: dict[str, Any]) -> dict[str, Any]:
         """Command arm to move to a target joint configuration.
 
         The relative action magnitude may be clipped depending on the configuration parameter
@@ -214,6 +214,46 @@ class SO101Follower(Robot):
             present_pos = self.bus.sync_read("Present_Position")
             goal_present_pos = {key: (g_pos, present_pos[key]) for key, g_pos in goal_pos.items()}
             goal_pos = ensure_safe_goal_position(goal_present_pos, self.config.max_relative_target)
+
+        # Send goal position to the arm
+        self.bus.sync_write("Goal_Position", goal_pos)
+        return {f"{motor}.pos": val for motor, val in goal_pos.items()}
+    
+    def send_action(self, action: dict[str, Any]) -> dict[str, Any]:
+
+        if not self.is_connected:
+            raise DeviceNotConnectedError(f"{self} is not connected.")
+
+        goal_pos = {key.removesuffix(".pos"): val for key, val in action.items() if key.endswith(".pos")}
+
+        # Cap goal position when too far away from present position.
+        # /!\ Slower fps expected due to reading from the follower.
+        if self.config.max_relative_target is not None:
+            present_pos = self.bus.sync_read("Present_Position")
+            goal_present_pos = {key: (g_pos, present_pos[key]) for key, g_pos in goal_pos.items()}
+            goal_pos = ensure_safe_goal_position(goal_present_pos, self.config.max_relative_target)
+
+        """Reset robot arm to target position using smooth trajectory."""
+        current_position_dict = self.bus.sync_read("Present_Position")
+        print("current_position_dict:", current_position_dict)
+        current_position = np.array(
+            [current_position_dict[name] for name in current_position_dict], dtype=np.float32
+        )
+
+        goal_posnp = np.array(
+            [goal_pos[name] for name in goal_pos], dtype=np.float32
+        )
+        #print("current_position ",current_position)
+        #print("goal_posnp ",goal_posnp)
+        trajectory = torch.from_numpy(
+            np.linspace(current_position, goal_posnp, 50)
+        )  # NOTE: 30 is just an arbitrary number
+        for pose in trajectory:
+            action_dict = dict(zip(current_position_dict, pose, strict=False))
+            self.bus.sync_write("Goal_Position", action_dict)
+            busy_wait(0.015)
+
+        
 
         # Send goal position to the arm
         self.bus.sync_write("Goal_Position", goal_pos)

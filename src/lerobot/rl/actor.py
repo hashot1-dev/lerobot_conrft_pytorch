@@ -362,10 +362,14 @@ def act_with_policy(
 
         if done or truncated:
             logging.info(f"[ACTOR] Global step {interaction_step}: Episode reward: {sum_reward_episode}")
+            # if(reward > 0):
+            #     online_env.reset1()
+
 
             update_policy_parameters(policy=policy, parameters_queue=parameters_queue, device=device)
 
             if len(list_transition_to_send_to_learner) > 0:
+                logging.info("push_transitions_to_transport_queue")
                 push_transitions_to_transport_queue(
                     transitions=list_transition_to_send_to_learner,
                     transitions_queue=transitions_queue,

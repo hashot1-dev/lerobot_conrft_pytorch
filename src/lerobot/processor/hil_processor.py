@@ -693,8 +693,8 @@ class DinoDetectionRewardProcessorStep(ProcessorStep):
             # Required pose components not available; keep reward unchanged.
             print("DinoDetectionRewardProcessorStep failed, no ee pose")
             return new_transition
-        print(time.time())
-        print(f"#####dino score {reward_delta}, distance {distance} ee_x: {ee_x}, ee_y: {ee_y}, ee_z: {ee_z}")
+        #print(time.time())
+        print(f"#####dino score {reward_delta}, distance {distance} , ee_z: {ee_z}")  #ee_x: {ee_x}, ee_y: {ee_y},
         if reward_delta > 0.75 and ee_z < 0.13:
             terminated = True
             # reward = float(new_transition.get(TransitionKey.REWARD, 0.0))

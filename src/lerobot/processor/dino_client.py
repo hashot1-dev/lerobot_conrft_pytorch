@@ -225,8 +225,8 @@ def dino_client_detect(model, image, prompt, box_threshold=0.55, text_threshold=
     model.send_request(request)
     request.wait_until_done(timeout=10) 
     end_time = time.time()
-    print("receive result time: ", end_time)
-    print("dino_client_detect 1 cost: ", end_time - start_time)
+    #print("receive result time: ", end_time)
+    #print("dino_client_detect 1 cost: ", end_time - start_time)
     boxes, logits, phrases = request.boxes, request.logits, request.phrases
     #annotated_frame = annotate(image_source=image, boxes=boxes, logits=logits, phrases=phrases)
     
@@ -248,7 +248,7 @@ def dino_client_detect(model, image, prompt, box_threshold=0.55, text_threshold=
     
     # 按 logits 从大到小排序
     det_objects.sort(key=lambda x: x.logit, reverse=True)
-    print("dino debug:", boxes, logits, phrases)
+    #print("dino debug:", boxes, logits, phrases)
     end_time = time.time()
     print("dino_client_detect 2 cost: ", end_time - start_time)
     
