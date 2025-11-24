@@ -274,15 +274,15 @@ class KeyboardEndEffectorTeleop(KeyboardTeleop):
         # Process any pending misc keys
         while not self.misc_keys_queue.empty():
             key = self.misc_keys_queue.get_nowait()
-            if key == "p":
+            if key == 'p':
                 success = True
-            elif key == "r":
+            elif key == 'r':
                 terminate_episode = True
                 rerecord_episode = True
-            elif key == "q":
+            elif key == 'q':
                 terminate_episode = True
                 success = False
-            elif key == "t":
+            elif key == 't':
                 self.use_policy = not self.use_policy
                 print("use_policy: ", self.use_policy)
 

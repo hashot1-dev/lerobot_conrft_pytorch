@@ -16,7 +16,15 @@
 
 from dataclasses import dataclass, field
 from typing import Any
-
+import struct
+import time
+import json
+from multiprocessing import shared_memory
+from datetime import datetime
+import matplotlib.pyplot as plt
+from mpl_toolkits.mplot3d import Axes3D
+import numpy as np
+import argparse
 import numpy as np
 
 from lerobot.configs.types import FeatureType, PipelineFeatureType, PolicyFeature
@@ -31,6 +39,72 @@ from lerobot.processor import (
     TransitionKey,
 )
 from lerobot.utils.rotation import Rotation
+class SharedMemoryReader:
+    def __init__(self, shm_name='t265_pose_data', size=1024):
+        self.shm_name = shm_name
+        self.size = size
+        self.shm = None
+        
+    def connect_shm(self, timeout=10):
+        """连接到共享内存"""
+        start_time = time.time()
+        
+        while time.time() - start_time < timeout:
+            try:
+                self.shm = shared_memory.SharedMemory(name=self.shm_name, create=False)
+                print(f"已连接到共享内存 '{self.shm_name}'")
+                return True
+            except FileNotFoundError:
+                print(f"等待共享内存 '{self.shm_name}' 创建... ({time.time() - start_time:.1f}s)")
+                time.sleep(0.5)
+            except Exception as e:
+                print(f"连接共享内存失败: {e}")
+                return False
+        
+        print(f"等待共享内存超时 ({timeout}秒)")
+        return False
+    
+    def read_pose_data(self):
+        """从共享内存读取位姿数据"""
+        if not self.shm:
+            return None
+            
+        try:
+            # 读取二进制数据 - 修正为92字节
+            # 11个double (8*11=88) + 1个int (4) = 92字节
+            data_bytes = bytes(self.shm.buf[0:92])
+            
+            if len(data_bytes) == 92:
+                # 解析二进制数据 - 修正格式字符串
+                # 11个double: 位置x3, 旋转x4, 速度x3, 时间戳x1 + 1个int置信度
+                data = struct.unpack('11di', data_bytes)
+                
+                pose_data = {
+                    'x': data[0], 'y': data[1], 'z': data[2],
+                    'qx': data[3], 'qy': data[4], 'qz': data[5], 'qw': data[6],
+                    'vx': data[7], 'vy': data[8], 'vz': data[9],
+                    'timestamp': data[10],
+                    'confidence': data[11],
+                    'is_valid': True
+                }
+                
+                # 检查数据是否有效（时间戳不为0）
+                if pose_data['timestamp'] > 0:
+                    return pose_data
+                
+        except Exception as e:
+            print(f"读取共享内存失败: {e}")
+            
+        return None
+    
+    def close(self):
+        """关闭共享内存连接"""
+        try:
+            if self.shm:
+                self.shm.close()
+        except Exception as e:
+            print(f"关闭共享内存时出错: {e}")   
+
 
 
 @ProcessorStepRegistry.register("ee_reference_and_delta")
@@ -72,7 +146,21 @@ class EEReferenceAndDelta(RobotActionProcessorStep):
     _prev_enabled: bool = field(default=False, init=False, repr=False)
     _command_when_disabled: np.ndarray | None = field(default=None, init=False, repr=False)
 
+    shm_reader = SharedMemoryReader("t265_pose_data")
+    running = False
+    pose_history = []
+    max_history = 1000
+    display_interval = 0.1
+    last_display_time = 0
+    read_count = 0
+    connect =False
+
     def action(self, action: RobotAction) -> RobotAction:
+
+        if(not self.connect):
+            self.shm_reader.size=1024
+            self.shm_reader.connect_shm(30)
+            self.connect= True
         observation = self.transition.get(TransitionKey.OBSERVATION).copy()
 
         if observation is None:
@@ -97,7 +185,7 @@ class EEReferenceAndDelta(RobotActionProcessorStep):
 
         # Current pose from FK on measured joints
         t_curr = self.kinematics.forward_kinematics(q_raw)
-
+        
         enabled = bool(action.pop("enabled"))
         tx = float(action.pop("target_x"))
         ty = float(action.pop("target_y"))
@@ -148,8 +236,15 @@ class EEReferenceAndDelta(RobotActionProcessorStep):
         action["ee.wy"] = float(tw[1])
         action["ee.wz"] = float(tw[2])
         action["ee.gripper_vel"] = gripper_vel
-
+        print("mk ee_action:: ",action)
+        pose_data = self.shm_reader.read_pose_data()
+        print("265 pose_data:: ",pose_data)
         self._prev_enabled = enabled
+    #'ee.x': 0.39553810410701296, 'ee.y': 0.0025024925733363053, 'ee.z': 0.19295834032125866
+
+        action["ee.x"] = 0.39553810410701296+pose_data['x']/4
+        action["ee.y"] = 0.0025024925733363053+pose_data['y']/4
+        action["ee.z"] = 0.19295834032125866+pose_data['z']/4
         return action
 
     def reset(self):

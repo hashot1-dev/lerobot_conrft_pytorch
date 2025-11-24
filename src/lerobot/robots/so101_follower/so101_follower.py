@@ -225,14 +225,14 @@ class SO101Follower(Robot):
             raise DeviceNotConnectedError(f"{self} is not connected.")
 
         goal_pos = {key.removesuffix(".pos"): val for key, val in action.items() if key.endswith(".pos")}
-
+        print("goal_pos0:", goal_pos) 
         # Cap goal position when too far away from present position.
         # /!\ Slower fps expected due to reading from the follower.
         if self.config.max_relative_target is not None:
             present_pos = self.bus.sync_read("Present_Position")
             goal_present_pos = {key: (g_pos, present_pos[key]) for key, g_pos in goal_pos.items()}
             goal_pos = ensure_safe_goal_position(goal_present_pos, self.config.max_relative_target)
-
+            print("goal_pos1:", goal_pos)       
         """Reset robot arm to target position using smooth trajectory."""
         current_position_dict = self.bus.sync_read("Present_Position")
         print("current_position_dict:", current_position_dict)

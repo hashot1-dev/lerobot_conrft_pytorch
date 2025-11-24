@@ -87,7 +87,7 @@ class SACPolicy(
         observations_features = None
         if self.shared_encoder and self.actor.encoder.has_images:
             observations_features = self.actor.encoder.get_cached_image_features(batch)
-
+        #torch.onnx.export(self.actor,(batch,observations_features),'lerobot_model.onnx',opset_version=20)
         actions, _, _ = self.actor(batch, observations_features)
 
         if self.config.num_discrete_actions is not None:

@@ -378,7 +378,7 @@ class RobotEnv(gym.Env):
         print("send action: ",joint_targets_dict)
         if joint_targets_dict["elbow_flex.pos"] < 3.7037:
             joint_targets_dict["elbow_flex.pos"] = 3.7037
-        self.robot.send_action(joint_targets_dict)
+        self.robot.send_action1(joint_targets_dict)
         
         print("$$$send 1action_du:"+str(time.time()-self.lasttime))
         obs = self._get_observation()
@@ -597,21 +597,21 @@ def make_processors(
             radius_z=cfg.processor.reward_rule.radius_z,
             terminate_on_success=terminate_on_success,
         ))
-    elif cfg.processor.dino_reward is not None:
-        prompts = cfg.processor.dino_reward.prompts or []
-        if len(prompts) != 2:
-            raise ValueError("cfg.processor.dino_reward.prompts must contain exactly two entries.")
-        env_pipeline_steps.append(
-            DinoDetectionRewardProcessorStep(
-                prompts=(str(prompts[0]), str(prompts[1])),
-                image_key=cfg.processor.dino_reward.image_key,
-                server_uri=cfg.processor.dino_reward.server_uri,
-                box_threshold=cfg.processor.dino_reward.box_threshold,
-                text_threshold=cfg.processor.dino_reward.text_threshold,
-                reward_scale=cfg.processor.dino_reward.reward_scale,
-                distance_norm=cfg.processor.dino_reward.distance_norm,
-            )
-        )
+    # elif cfg.processor.dino_reward is not None: #mengke
+    #     prompts = cfg.processor.dino_reward.prompts or []
+    #     if len(prompts) != 2:
+    #         raise ValueError("cfg.processor.dino_reward.prompts must contain exactly two entries.")
+    #     env_pipeline_steps.append(
+    #         DinoDetectionRewardProcessorStep(
+    #             prompts=(str(prompts[0]), str(prompts[1])),
+    #             image_key=cfg.processor.dino_reward.image_key,
+    #             server_uri=cfg.processor.dino_reward.server_uri,
+    #             box_threshold=cfg.processor.dino_reward.box_threshold,
+    #             text_threshold=cfg.processor.dino_reward.text_threshold,
+    #             reward_scale=cfg.processor.dino_reward.reward_scale,
+    #             distance_norm=cfg.processor.dino_reward.distance_norm,
+    #         )
+    #     )
 
     env_pipeline_steps.append(AddBatchDimensionProcessorStep())
     env_pipeline_steps.append(DeviceProcessorStep(device=device))

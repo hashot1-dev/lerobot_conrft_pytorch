@@ -378,7 +378,7 @@ def add_actor_information_and_train(
             dataset_repo_id=dataset_repo_id,
             shutdown_event=shutdown_event,
         )
-
+        logging.info("2")
         # Process all available interaction messages sent by the actor server
         interaction_message = process_interaction_messages(
             interaction_message_queue=interaction_message_queue,
@@ -386,7 +386,7 @@ def add_actor_information_and_train(
             wandb_logger=wandb_logger,
             shutdown_event=shutdown_event,
         )
-
+        logging.info("3")
         # Wait until the replay buffer has enough samples to start training
         if len(replay_buffer) < online_step_before_learning:
             #print("continue")
@@ -396,12 +396,12 @@ def add_actor_information_and_train(
             online_iterator = replay_buffer.get_iterator(
                 batch_size=batch_size, async_prefetch=async_prefetch, queue_size=2
             )
-
+        logging.info("4")
         if offline_replay_buffer is not None and offline_iterator is None:
             offline_iterator = offline_replay_buffer.get_iterator(
                 batch_size=batch_size, async_prefetch=async_prefetch, queue_size=2
             )
-
+        logging.info("5")
         time_for_one_optimization_step = time.time()
         for _ in range(utd_ratio - 1):
             # Sample from the iterators
@@ -1006,6 +1006,7 @@ def initialize_offline_replay_buffer(
     """
     if not cfg.resume:
         logging.info("make_dataset offline buffer")
+        logging.info("mengke")
         offline_dataset = make_dataset(cfg)
     else:
         logging.info("load offline dataset")
