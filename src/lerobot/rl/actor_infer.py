@@ -265,7 +265,7 @@ def act_with_policy(
         cfg=cfg.policy,
         env_cfg=cfg.env,
     )
-    policy = policy.from_pretrained("/workspace/0168000_save/pretrained_model")
+    policy = policy.from_pretrained("/home/mk/project/lerobot_conrft_pytorch/0168000_save/pretrained_model")
     policy = policy.eval()
     assert isinstance(policy, nn.Module)
     

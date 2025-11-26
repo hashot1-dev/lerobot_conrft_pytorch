@@ -376,8 +376,8 @@ class RobotEnv(gym.Env):
         
         self.lasttime = time.time()    
         print("send action: ",joint_targets_dict)
-        if joint_targets_dict["elbow_flex.pos"] < 3.7037:
-            joint_targets_dict["elbow_flex.pos"] = 3.7037
+        # if joint_targets_dict["elbow_flex.pos"] < 3.7037:
+        #     joint_targets_dict["elbow_flex.pos"] = 3.7037
         self.robot.send_action1(joint_targets_dict)
         
         print("$$$send 1action_du:"+str(time.time()-self.lasttime))
